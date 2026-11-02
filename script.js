@@ -4,93 +4,107 @@
 
 // Step 1: live text (name, job, email, bio -> card), trimmed, default text when empty
 
-const form = document.getElementById('card-form');
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("card-form");
+  const nameInput = document.getElementById("name-input");
+  const jobInput = document.getElementById("job-input");
+  const emailInput = document.getElementById("email-input");
+  const bioInput = document.getElementById("bio-input");
+  const colorSelect = document.getElementById("color-select");
+  const themeBtn = document.getElementById("theme-btn");
+  const resetBtn = document.getElementById("reset-btn");
 
-form.addEventListener('input', function (event) {
-    const value = event.target.value.trim();
+  const cardName = document.getElementById("card-name");
+  const cardJob = document.getElementById("card-job");
+  const cardEmail = document.getElementById("card-email");
+  const cardBio = document.getElementById("card-bio");
+  const avatar = document.getElementById("avatar");
+  const bioLeft = document.getElementById("bio-left");
+  const counterElement = document.querySelector(".counter");
 
-    if (event.target.id === 'name-input') {
-        document.getElementById('card-name').innerText = event.target.value || 'Your name';
-        updateAvatar(event.target.value);
+  const MAX_BIO_LENGTH = 80;
+
+  // שמירת טקסט ברירת המחדל המקורי מה-HTML
+  const defaults = {
+    name: cardName.textContent,
+    job: cardJob.textContent,
+    email: cardEmail.textContent,
+    bio: cardBio.textContent,
+  };
+
+  // פונקציית עדכון ראשית לכל רכיבי הכרטיס
+  function updateCard() {
+    const nameVal = nameInput.value.trim();
+    const jobVal = jobInput.value.trim();
+    const emailVal = emailInput.value.trim();
+    const bioVal = bioInput.value.trim();
+
+    // שימוש בערכים המנוקים (nameVal וכו') כדי שהכרטיס יציג את הטקסט בלי רווחים מיותרים
+    cardName.textContent = nameVal !== "" ? nameVal : defaults.name;
+    cardJob.textContent = jobVal !== "" ? jobVal : defaults.job;
+    cardEmail.textContent = emailVal !== "" ? emailVal : defaults.email;
+    cardBio.textContent = bioVal !== "" ? bioVal : defaults.bio;
+
+    // שלב 2: אות ראשונה באווטר (באות גדולה, או סימן שאלה אם ריק)
+    if (nameVal !== "") {
+      avatar.textContent = nameVal.charAt(0).toUpperCase();
+    } else {
+      avatar.textContent = "?";
     }
-    else if (event.target.id === 'job-input') {
-        document.getElementById('card-job').innerText = event.target.value || 'Job title';
+
+    // שלב 3: מונה תווים ל-Bio
+    const currentBioLength = bioInput.value.length;
+    const charsLeft = MAX_BIO_LENGTH - currentBioLength;
+    bioLeft.textContent = charsLeft;
+
+    if (counterElement) {
+      counterElement.classList.toggle("warning", charsLeft <= 10);
     }
-    else if (event.target.id === 'email-input') {
-        document.getElementById('card-email').innerText = event.target.value || 'email@example.com';
+  }
+
+  form.addEventListener("input", () => {
+    updateCard();
+  });
+
+  // שלב 4: שינוי צבע המסגרת והאווטר
+  colorSelect.addEventListener("change", (e) => {
+    const selectedColor = e.target.value;
+    const cardElement = document.getElementById("card");
+    
+    if (cardElement) {
+      cardElement.style.borderColor = selectedColor;
     }
-    else if (event.target.id === 'bio-input') {
-        const bioLeft = document.getElementById('bio-left');
-        const counterElement = document.querySelector('.counter');
-
-        document.getElementById('card-bio').innerText = event.target.value || 'Short bio about yourself...';
-        const charsLeft = 80 - event.target.value.length;
-
-        if (bioLeft) {
-            bioLeft.innerText = charsLeft;
-        }
-
-        if (counterElement) {
-            if (charsLeft <= 10) {
-                counterElement.classList.add('warning');
-            } else {
-                counterElement.classList.remove('warning');
-            }
-        }
+    if (avatar) {
+      avatar.style.backgroundColor = selectedColor;
     }
-    else if (event.target.id === 'color-select') {
-        const color = event.target.value;
-        const card = document.querySelector('.card');
-        const avatarCard = document.getElementById('avatar');
+  });
 
-        if (card) {
-            card.style.borderColor = color;
-        }
+  // שלב 5: מצב כהה (Dark / Light Mode)
+  themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    const isDark = document.body.classList.contains("dark");
+    themeBtn.textContent = isDark ? "Light mode" : "Dark mode";
+  });
 
-        if (avatarCard) {
-            avatarCard.style.backgroundColor = color;
-        }
+  // שלב 6: איפוס הטופס והכרטיס
+  resetBtn.addEventListener("click", () => {
+    form.reset();
+    
+    const cardElement = document.getElementById("card");
+    if (cardElement) {
+      cardElement.style.borderColor = "";
     }
-});
-// Step 2: avatar letter (first letter of the name in uppercase, "?" when empty)
-const avatarCard = document.getElementById('avatar');
-function updateAvatar(nameText) {
-    const trimmedName = nameText.trim();
+    if (avatar) {
+      avatar.style.backgroundColor = "";
+    }
 
-    const firstLetter = trimmedName ? trimmedName[0].toUpperCase() : '?';
-
-    avatarCard.innerText = firstLetter;
-}
-// Step 3: bio character counter + "warning" class when 10 or fewer are left
-
-// Step 4: accent color (card border + avatar background)
-
-// Step 5: dark mode button
-document.addEventListener('click', function (event) {
-    handleThemeToggle(event.target);
-});
-function handleThemeToggle(target) {
-    if (!target || target.id !== 'theme-btn') return;
-    const isDark = document.body.classList.toggle('dark');
-    target.innerText = isDark ? 'Light mode' : 'Dark mode';
-}
-// Step 6: reset button
-document.getElementById("reset-btn")?.addEventListener('click', function () {
-    document.getElementById("card-form")?.reset();
-
-    document.getElementById("card-name").innerText = "Your name";
-    document.getElementById("card-job").innerText = "Job title";
-    document.getElementById("card-email").innerText = "email@example.com";
-    document.getElementById("card-bio").innerText = "Short bio about yourself...";
-
-    document.getElementById("avatar").innerText = "?";
-    document.getElementById("avatar").style.backgroundColor = "";
-    document.getElementById("bio-left").innerText = "80";
-    document.querySelector(".counter")?.classList.remove("warning");
-
-    document.querySelector(".card").style.borderColor = "";
     document.body.classList.remove("dark");
-    document.getElementById("theme-btn").textContent = "Dark mode";
+    themeBtn.textContent = "Dark mode";
+
+    updateCard();
+  });
+
+  updateCard();
 });
 // 
 
